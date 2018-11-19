@@ -6,9 +6,7 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import java.io.*;
 
 public class QuickTest {
-    public static void main(String[] args){
-        new QuickTest().createPdfTest();
-    }
+    public static void main(String[] args){new QuickTest().createPdfTest();}
 
     public void createPdfTest(){
         String fileLocation = System.getProperty("user.home") + "/Desktop/";
