@@ -8,21 +8,45 @@ import java.util.*;
 
 // Abstract class for creating .pdf files using Apache PDFBox
 public abstract class PDFCreator {
-    private String filePath, fileName;
-    private PDDocument doc = new PDDocument();
-    private ArrayList<PDPage> pages = new ArrayList<>();
-    private PDDocumentInformation pdi = doc.getDocumentInformation();
-    private PDPageContentStream cs;
+    protected String filePath, fileName;
+    protected PDDocument doc = new PDDocument();
+    protected ArrayList<PDPage> pages = new ArrayList<>();
+    protected PDDocumentInformation pdi = doc.getDocumentInformation();
+    protected PDPageContentStream cs;
+    protected int X_OFFSET;
 
     // @param FilePath: The location of the file
     // @param FileName: The name of the file (DO NOT! end with .pdf)
-    PDFCreator(String FilePath, String FileName){
-        this.filePath = FilePath;
-        this.fileName = FileName;
+    PDFCreator(String FilePath, String FileName, int xOffset){
+        filePath = FilePath;
+        fileName = FileName;
+        X_OFFSET = xOffset;
+
         pages.add(new PDPage());
         doc.addPage(pages.get(0));
-        setCreationDay();
         cs = setupCS();
+
+        setCreationDay();
+    }
+
+    private PDPageContentStream setupCS(){
+        try {
+            return new PDPageContentStream(doc, pages.get(0));
+        } catch (IOException e) {System.out.print("ERROR: " + e);}
+        return null;
+    }
+
+    private void setCSFont(int fontSize){
+        try {
+            cs.setFont(PDType1Font.TIMES_ROMAN, fontSize);
+            cs.setLeading(fontSize + 5f);
+        } catch (IOException e) {System.out.print("ERROR: " + e);}
+    }
+
+    public PDFCreator setCreationDay(){
+        Calendar date = new GregorianCalendar();
+        pdi.setCreationDate(date);
+        return this;
     }
 
     public PDFCreator setTitle(String Title){
@@ -40,17 +64,44 @@ public abstract class PDFCreator {
         return this;
     }
 
-    public PDFCreator setCreationDay(){
-        Calendar date = new GregorianCalendar();
-        pdi.setCreationDate(date);
+    public PDFCreator writeTitle(String Title, int y){
+        try {
+            cs.beginText();
+            setCSFont(25);
+            cs.newLineAtOffset(X_OFFSET, y);
+            cs.showText(Title);
+            cs.endText();
+        } catch (IOException e) {System.out.print("ERROR: " + e);}
         return this;
     }
 
-    private PDPageContentStream setupCS(){
-        try {
-            return new PDPageContentStream(doc, pages.get(0));
+    public PDFCreator makeLine(char c, int amount, int y){
+        String line = "";
+        try{
+            for (int i = 0; i < amount; i++){line += c;}
+            cs.beginText();
+            setCSFont(14);
+            cs.newLineAtOffset(X_OFFSET, y);
+            cs.showText(line);
+            cs.endText();
         } catch (IOException e) {System.out.print("ERROR: " + e);}
-        return null;
+        return this;
+    }
+
+    // Note this is the default implementation to write lines, however it is
+    // encouraged to overwrite this to make it fit with styling etc.
+    public PDFCreator writeLines(LinkedList<String> Lines, int yOffset){
+        try {
+            cs.beginText();
+            setCSFont(12);
+            cs.newLineAtOffset(X_OFFSET, yOffset);
+            for (String s: Lines) {
+                cs.showText(s);
+                cs.newLine();
+            }
+            cs.endText();
+        } catch (IOException e) {System.out.print("ERROR: " + e);}
+        return this;
     }
 
     private String exactFilePath(){return filePath + "/" + fileName + ".pdf";}
@@ -62,39 +113,5 @@ public abstract class PDFCreator {
             doc.save(exactFilePath());
             doc.close();
         } catch (IOException e) {System.out.print("ERROR: " + e);}
-    }
-
-    private void setCSFont(PDPageContentStream stream, int fontSize){
-        try {
-            stream.setFont(PDType1Font.TIMES_ROMAN, fontSize);
-            stream.setLeading(fontSize + 5f);
-        } catch (IOException e) {System.out.print("ERROR: " + e);}
-    }
-
-    public PDFCreator writeTitle(String Title){
-        try {
-            cs.beginText();
-            setCSFont(cs, 25);
-            cs.newLineAtOffset(30, 725);
-            cs.showText(Title);
-            cs.endText();
-        } catch (IOException e) {System.out.print("ERROR: " + e);}
-        return this;
-    }
-
-    // Note this is the default implementation to write lines, however it is
-    // encouraged to overwrite this to make it fit with styling etc.
-    public PDFCreator writeLines(LinkedList<String> Lines, int yOffset){
-        try {
-            cs.beginText();
-            setCSFont(cs, 12);
-            cs.newLineAtOffset(30, yOffset);
-            for (String s: Lines) {
-                cs.showText(s);
-                cs.newLine();
-            }
-            cs.endText();
-        } catch (IOException e) {System.out.print("ERROR: " + e);}
-        return this;
     }
 }
