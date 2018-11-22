@@ -5,14 +5,14 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import java.io.IOException;
 import java.util.*;
 
-// The class for easy creation of pluck-lists in .pdf, with the option of password-securing the document
+// The class for easy creation of delivery notes in .pdf, with the option of password-securing the document
 public class DeliveryNoteCreator extends SecurePDFCreator {
 
     // Note X_OFFSET is hardcoded to 50
     public DeliveryNoteCreator(String FilePath, String FileName, int xOffset){
         super(FilePath, FileName, xOffset);
         X_OFFSET = 50;
-        makeLine('_', 70, 720);
+        makeLine('_', 60, 720);
     }
 
     // @Param formattedInfo: Company;Recipient;Address;Zip City;Country
@@ -99,7 +99,7 @@ public class DeliveryNoteCreator extends SecurePDFCreator {
         writeBoldLineXYSize(translate[3], 340,590,11);
 
         // Write titles on the line
-        makeLine('_', 70, 550);
+        makeLine('_', 60, 550);
         writeBoldLineXYSize(translate[4], 50, 550, 10);
         writeBoldLineXYSize(translate[5], 170, 550, 10);
         writeBoldLineXYSize(translate[6], 470, 550, 10);
