@@ -1,6 +1,7 @@
 package com.mathiasgam.PdfCreator;
 
 import org.apache.pdfbox.pdmodel.*;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ public abstract class PDFCreator {
         fileName = FileName;
         X_OFFSET = xOffset;
 
-        pages.add(new PDPage());
+        pages.add(new PDPage(PDRectangle.A4));
         doc.addPage(pages.get(0));
         cs = setupCS();
 
@@ -38,8 +39,8 @@ public abstract class PDFCreator {
 
     private void setCSFont(int fontSize){
         try {
-            cs.setFont(PDType1Font.TIMES_ROMAN, fontSize);
-            cs.setLeading(fontSize + 5f);
+            cs.setFont(PDType1Font.HELVETICA, fontSize);
+            cs.setLeading(fontSize + 4f);
         } catch (IOException e) {System.out.print("ERROR: " + e);}
     }
 
@@ -64,12 +65,12 @@ public abstract class PDFCreator {
         return this;
     }
 
-    public PDFCreator writeTitle(String Title, int y){
+    public PDFCreator writeLine(String text, int y, boolean defaultFont){
         try {
             cs.beginText();
-            setCSFont(25);
+            if (defaultFont){setCSFont(25);}
             cs.newLineAtOffset(X_OFFSET, y);
-            cs.showText(Title);
+            cs.showText(text);
             cs.endText();
         } catch (IOException e) {System.out.print("ERROR: " + e);}
         return this;
@@ -88,13 +89,47 @@ public abstract class PDFCreator {
         return this;
     }
 
-    // Note this is the default implementation to write lines, however it is
-    // encouraged to overwrite this to make it fit with styling etc.
-    public PDFCreator writeLines(LinkedList<String> Lines, int yOffset){
+    public PDFCreator writeLineXYSize(String text, int x, int y, int fontSize){
+        try{
+            cs.beginText();
+            cs.newLineAtOffset(x, y);
+            cs.setFont(PDType1Font.HELVETICA, fontSize);
+            cs.showText(text);
+            cs.endText();
+        } catch (IOException e) {System.out.print("ERROR: " + e);}
+        return this;
+    }
+
+    public PDFCreator writeBoldLineXYSize(String text, int x, int y, int fontSize){
+        try{
+            cs.beginText();
+            cs.newLineAtOffset(x, y);
+            cs.setFont(PDType1Font.HELVETICA_BOLD, fontSize);
+            cs.showText(text);
+            cs.endText();
+        } catch (IOException e) {System.out.print("ERROR: " + e);}
+        return this;
+    }
+
+    public PDFCreator writeLines(LinkedList<String> Lines, int yOffset, boolean defaultFont){
         try {
             cs.beginText();
-            setCSFont(12);
+            if (defaultFont){setCSFont(12);}
             cs.newLineAtOffset(X_OFFSET, yOffset);
+            for (String s: Lines) {
+                cs.showText(s);
+                cs.newLine();
+            }
+            cs.endText();
+        } catch (IOException e) {System.out.print("ERROR: " + e);}
+        return this;
+    }
+
+    public PDFCreator writeLinesXYFontSize(LinkedList<String> Lines, int xOffset, int yOffset, int fontSize){
+        try {
+            cs.beginText();
+            setCSFont(fontSize);
+            cs.newLineAtOffset(xOffset, yOffset);
             for (String s: Lines) {
                 cs.showText(s);
                 cs.newLine();
